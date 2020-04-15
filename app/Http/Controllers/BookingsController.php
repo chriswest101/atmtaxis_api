@@ -3,14 +3,21 @@
 namespace App\Http\Controllers;
 
 use App\Booking;
+use App\Http\Requests\CreateBooking;
 use App\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
 class BookingsController extends Controller
 {
+    public function getAll()
+    {
+        return Auth::user()->bookings;
+    }
+
     public function get(string $bookingId)
     {
         $validator = Validator::make(['bookingId' => $bookingId], ['bookingId' => 'required|numeric']);
@@ -22,17 +29,7 @@ class BookingsController extends Controller
 
         return Booking::findOrFail($bookingId);
     }
-
-    /**
-     * Creates a booking
-     *
-     * @param  [string] email
-     * @param  [string] password
-     * @param  [boolean] remember_me
-     * @return [string] access_token
-     * @return [string] token_type
-     * @return [string] expires_at
-     */
+    
     public function create(Request $request)
     {
         $bookingData = [
@@ -77,7 +74,9 @@ class BookingsController extends Controller
                     'name' => $request->name,
                     'email' => $request->email,
                     'password' => Hash::make(Str::random(40)),
-                    'phone' => $request->phone
+                    'phone' => $request->phone,
+                    'guest_account' => true,
+                    'api_token' => Str::random(60)
                 ]);
                 $user->save();
                 $user = User::where('email', $request->email)->first();

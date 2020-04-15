@@ -6,12 +6,18 @@ use App\Booking;
 use App\Quote;
 use App\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
 class QuotesController extends Controller
 {
+    public function getAll()
+    {
+        return Auth::user()->quotes;
+    }
+
     public function get(string $quoteId)
     {
         $validator = Validator::make(['quoteId' => $quoteId], ['quoteId' => 'required|numeric']);
@@ -66,14 +72,15 @@ class QuotesController extends Controller
                     'name' => $request->name,
                     'email' => $request->email,
                     'password' => Hash::make(Str::random(40)),
-                    'phone' => $request->phone
+                    'guest_account' => true,
+                    'api_token' => Str::random(60)
                 ]);
                 $user->save();
                 $user = User::where('email', $request->email)->first();
             }
             else
             {
-                $user->phone = $request->phone;
+                $user->email = $request->email;
                 $user->save();
             }
 

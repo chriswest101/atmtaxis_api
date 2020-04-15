@@ -36,6 +36,7 @@ Route::group([
     Route::group([
       'middleware' => 'auth:api'
     ], function() {
+        Route::get('', ['uses' => 'BookingsController@getAll']);
         Route::get('{bookingId}', ['uses' => 'BookingsController@get', 'middleware' => 'AuthResource']);
     });
 });
@@ -48,6 +49,7 @@ Route::group([
     Route::group([
       'middleware' => 'auth:api'
     ], function() {
+        Route::get('', ['uses' => 'QuotesController@getAll']);
         Route::get('{quoteId}', ['uses' => 'QuotesController@get', 'middleware' => 'AuthResource']);
     });
 });
