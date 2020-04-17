@@ -54,3 +54,10 @@ Route::group([
     });
 });
 
+Route::group([
+    'prefix' => 'prices'
+], function () {
+    Route::get('estimate', 'PricesController@getEstimate');
+});
+
+
