@@ -12,13 +12,12 @@ class PricesController extends Controller
 {
     public function getEstimate(Request $request)
     {
-        $data = [
-            'distance' => $request->distance
-        ];
         $validator = Validator::make(
-            $data,
             [
-                'distance' => 'required|numeric',
+                'distance' => $request->distance
+            ],
+            [
+                'distance' => 'required|numeric|min:0',
             ]);
 
         if ($validator->fails())
@@ -27,15 +26,13 @@ class PricesController extends Controller
         }
         else
         {
-            $minimumPrice = Config::where('name', '=', 'MINIMUM_PRICE')->first();
-            $defaultPrice = Config::where('name', '=', 'DEFAULT_PRICE')->first();
-            $distance = $request->distance;
-            $rate = Rate::where('name', '=', 'DAY')->first();
+            $minimumDistance = Config::where('name', '=', 'MINIMUM_DISTANCE')->first();
             $lowerMultiplier = PriceMultiplier::where('name', '=', 'LOWER')->first();
             $upperMultiplier = PriceMultiplier::where('name', '=', 'UPPER')->first();
+            $rate = Rate::where('name', '=', 'DAY')->first();
 
-            $price = preg_replace("/[^0-9,.]/", "", number_format((float)$distance * $rate->value, 2, '.', ''));
-            $price = $price < $minimumPrice->value ? $defaultPrice->value : $price;
+            $distance = (float)$request->distance < (float)$minimumDistance->value ? (float)$minimumDistance->value : (float)$request->distance;
+            $price = preg_replace("/[^0-9,.]/", "", number_format($distance * $rate->value, 2, '.', ''));
             $lowerPrice = number_format((float)round(($price*$lowerMultiplier->value)), 2, '.', '');
             $upperPrice = number_format((float)round(($price*$upperMultiplier->value)), 2, '.', '');
 
@@ -45,7 +42,7 @@ class PricesController extends Controller
                     'lower' => $lowerPrice,
                     'price' => $price,
                 ]
-            ], 201);
+            ], 200);
         }
     }
 }

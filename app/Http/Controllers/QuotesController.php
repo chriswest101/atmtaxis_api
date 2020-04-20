@@ -49,14 +49,14 @@ class QuotesController extends Controller
             [
                 'from_destination' => 'required|string',
                 'from_latlong' => 'required|string',
-                'to_destination' => 'required',
-                'to_latlong' => 'required',
+                'to_destination' => 'required|string',
+                'to_latlong' => 'required|string',
                 'date' => 'required|date_format:Y-m-d',
                 'time' => 'required',
                 'name' => 'required|string',
                 'email' => 'required|email',
-                'no_of_people' => 'required|numeric',
-                'distance' => 'required|string'
+                'no_of_people' => 'required|numeric|min:1|max:10',
+                'distance' => 'required|numeric|min:0'
             ]);
 
         if ($validator->fails())
