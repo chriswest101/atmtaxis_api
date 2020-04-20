@@ -11,7 +11,7 @@ use TestDatabaseSeeder;
 use Tests\TestCase;
 use Faker\Factory as Faker;
 
-class QuotesControllerTest extends TestCase
+class BookingsControllerTest extends TestCase
 {
     use RefreshDatabase;
 
@@ -22,25 +22,25 @@ class QuotesControllerTest extends TestCase
     }
     
     /**
-     * @dataProvider quoteProvider
+     * @dataProvider bookingProvider
      */
-    public function testGivenACreatedQuoteRequestThatIsInvalid_WhenCreateQuoteIsCalled_Then400BadRequestIsReturned($dataProvider)
+    public function testGivenACreatedBookingRequestThatIsInvalid_WhenCreateBookingIsCalled_Then400BadRequestIsReturned($dataProvider)
     {
         // Given
-        $quoteData = $dataProvider;
+        $bookingData = $dataProvider;
 
         // When
-        $response = $this->postJson('/api/quotes', $quoteData);
+        $response = $this->postJson('/api/bookings', $bookingData);
         
         // Then
         $response->assertStatus(400);
     }
     
-    public function testGivenACreatQuoteRequestAndTheUserDoesNotExist_WhenCreateQuoteIsCalled_Then201CreatedIsReturnedAndThatQuoteIsCreatedAndATempUserIsCreated()
+    public function testGivenACreatBookingRequestAndTheUserDoesNotExist_WhenCreateBookingIsCalled_Then201CreatedIsReturnedAndThatBookingIsCreatedAndATempUserIsCreated()
     {
         // Given
         $faker = Faker::create();
-        $quoteData = [
+        $bookingData = [
             'from_destination' => $faker->sentence(),
             'from_latlong' => $faker->randomFloat().','.$faker->randomFloat(),
             'to_destination' => $faker->sentence(),
@@ -49,36 +49,38 @@ class QuotesControllerTest extends TestCase
             'time' => $faker->time($format = 'H:i:s', $max = 'now'),
             'name' => $faker->name(),
             'email' => $faker->email(),
+            'phone' => $faker->randomNumber(),
             'no_of_people' => $faker->randomDigit(),
             'distance' => $faker->randomFloat()
         ];
 
         // When
-        $response = $this->postJson('/api/quotes', $quoteData);
+        $response = $this->postJson('/api/bookings', $bookingData);
         
         // Then
         $response->assertStatus(201);
-        $this->assertDatabaseHas('quotes', [
+        $this->assertDatabaseHas('bookings', [
             'id'       => 1,
             'user_id'  => 1,
-            'from_destination' => $quoteData['from_destination'],
-            'from_latlong' => $quoteData['from_latlong'],
-            'to_destination' => $quoteData['to_destination'],
-            'to_latlong' => $quoteData['to_latlong'],
-            'date' => $quoteData['date'],
-            'time' => $quoteData['time'],
-            'no_of_people' => $quoteData['no_of_people'],
-            'distance' => $quoteData['distance']
+            'from_destination' => $bookingData['from_destination'],
+            'from_latlong' => $bookingData['from_latlong'],
+            'to_destination' => $bookingData['to_destination'],
+            'to_latlong' => $bookingData['to_latlong'],
+            'date' => $bookingData['date'],
+            'time' => $bookingData['time'],
+            'no_of_people' => $bookingData['no_of_people'],
+            'distance' => $bookingData['distance']
         ]);
         $this->assertDatabaseHas('users', [
             'id'  => 1,
-            'name' => $quoteData['name'],
-            'email' => $quoteData['email'],
+            'name' => $bookingData['name'],
+            'email' => $bookingData['email'],
+            'phone' => $bookingData['phone'],
             'guest_account' => 1,
         ]);
     }
     
-    public function testGivenACreatQuoteRequestAndTheUserDoesExist_WhenCreateQuoteIsCalled_Then201CreatedIsReturnedAndThatQuoteIsCreatedAndLinkedToTheCorrectUser()
+    public function testGivenACreatBookingRequestAndTheUserDoesExist_WhenCreateBookingIsCalled_Then201CreatedIsReturnedAndThatBookingIsCreatedAndLinkedToTheCorrectUser()
     {
         // Given
         $users = factory(User::class, 3)->make();
@@ -86,7 +88,7 @@ class QuotesControllerTest extends TestCase
             $user->save();
         }
         $faker = Faker::create();
-        $quoteData = [
+        $bookingData = [
             'from_destination' => $faker->sentence(),
             'from_latlong' => $faker->randomFloat().','.$faker->randomFloat(),
             'to_destination' => $faker->sentence(),
@@ -95,26 +97,27 @@ class QuotesControllerTest extends TestCase
             'time' => $faker->time($format = 'H:i:s', $max = 'now'),
             'name' => $user->name,
             'email' => $user->email,
+            'phone' => $faker->randomNumber(),
             'no_of_people' => $faker->randomDigit(),
             'distance' => $faker->randomFloat()
         ];
 
         // When
-        $response = $this->postJson('/api/quotes', $quoteData);
+        $response = $this->postJson('/api/bookings', $bookingData);
         
         // Then
         $response->assertStatus(201);
-        $this->assertDatabaseHas('quotes', [
+        $this->assertDatabaseHas('bookings', [
             'id'       => 1,
             'user_id'  => $user->id,
-            'from_destination' => $quoteData['from_destination'],
-            'from_latlong' => $quoteData['from_latlong'],
-            'to_destination' => $quoteData['to_destination'],
-            'to_latlong' => $quoteData['to_latlong'],
-            'date' => $quoteData['date'],
-            'time' => $quoteData['time'],
-            'no_of_people' => $quoteData['no_of_people'],
-            'distance' => $quoteData['distance']
+            'from_destination' => $bookingData['from_destination'],
+            'from_latlong' => $bookingData['from_latlong'],
+            'to_destination' => $bookingData['to_destination'],
+            'to_latlong' => $bookingData['to_latlong'],
+            'date' => $bookingData['date'],
+            'time' => $bookingData['time'],
+            'no_of_people' => $bookingData['no_of_people'],
+            'distance' => $bookingData['distance']
         ]);
     }
 
@@ -123,7 +126,7 @@ class QuotesControllerTest extends TestCase
         parent::tearDown();
     }
 
-    public function quoteProvider()
+    public function bookingProvider()
     {
         return [
             [
@@ -136,6 +139,7 @@ class QuotesControllerTest extends TestCase
                     'time' => '',
                     'name' => '',
                     'email' => '',
+                    'phone' => '',
                     'no_of_people' => '',
                     'distance' => ''
                 ]
@@ -150,6 +154,7 @@ class QuotesControllerTest extends TestCase
                     'time' => 'a',
                     'name' => 'a',
                     'email' => 'a',
+                    'phone' => 'a',
                     'no_of_people' => 'a',
                     'distance' => 'a'
                 ]
@@ -164,6 +169,7 @@ class QuotesControllerTest extends TestCase
                     'time' => 'a',
                     'name' => 'a',
                     'email' => 'a@a.com',
+                    'phone' => '0111',
                     'no_of_people' => '0',
                     'distance' => '0'
                 ]
@@ -178,6 +184,7 @@ class QuotesControllerTest extends TestCase
                     'time' => 'a',
                     'name' => 'a',
                     'email' => 'a@a.com',
+                    'phone' => '0111',
                     'no_of_people' => '11',
                     'distance' => '1'
                 ]

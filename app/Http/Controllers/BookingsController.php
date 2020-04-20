@@ -57,8 +57,8 @@ class BookingsController extends Controller
                 'name' => 'required|string',
                 'phone' => 'required|numeric',
                 'email' => 'required|email',
-                'no_of_people' => 'required|numeric',
-                'distance' => 'required|string'
+                'no_of_people' => 'required|numeric|min:1|max:10',
+                'distance' => 'required|numeric|min:0'
             ]);
 
         if ($validator->fails())
